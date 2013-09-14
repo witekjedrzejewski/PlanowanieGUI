@@ -4,6 +4,8 @@
 #include "Gracz.h"
 
 class GraczBot : public Gracz {
+
+    Q_OBJECT
 	
 public:
 	GraczBot(int);

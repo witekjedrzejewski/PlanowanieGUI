@@ -9,7 +9,8 @@ class Talia {
 public:
 	Talia();
 	Karta getKarta();
-	std::vector<Karta> getKarty(int liczbaKart);
+
+    std::vector<Karta> getKarty(int liczbaKart);
 	
 private:
 	std::vector<Karta> karty;

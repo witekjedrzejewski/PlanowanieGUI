@@ -16,7 +16,7 @@ public:
 	
 	virtual ~Gracz();
 	
-	virtual void setReka(std::vector<Karta> reka);
+    virtual void setReka(std::vector<Karta> reka);
 	void setPlansza(Plansza* plansza);
 	
 	void deklaruj();
@@ -26,31 +26,23 @@ public:
 
 signals:
     void zadeklarowal();
-    void kartaWybrana();
+    void kartaWybrana(int nrKarty);
     void kartaPolozona();
 
-private slots:
-    void polozKarte();
+protected slots:
+    void polozKarte(int);
 
 protected:
 
-    struct KartyComparator {
-        bool operator() (const Karta&, const Karta&) const;
-    };
+    /* w podklasie metoda musi emitowac kartaWybrana(nrKarty) */
+    virtual void wybierzKarte() = 0;
 
-    typedef std::set<Karta, KartyComparator> ZestawKart;
-    typedef ZestawKart::iterator ItKarta;
-
-    virtual void wybierzKarte();
     virtual int wybierzDeklaracje() = 0;
-    virtual void usunKarte(ItKarta iter);
-    bool kartaPoprawna(ItKarta iter);
-    virtual bool posiadaKartyWKolorze(int kol);
+    virtual void usunKarte(int nrKarty);
 
-    ZestawKart reka;
+    int liczbaKart;
     Plansza* plansza;
     int nr;
-    ItKarta wybranaKarta;
 
 };
 

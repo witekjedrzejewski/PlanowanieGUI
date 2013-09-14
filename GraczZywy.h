@@ -4,15 +4,16 @@
 #include "Gracz.h"
 
 class GraczZywy : public Gracz {
+    Q_OBJECT
+
 public:
 	GraczZywy(int);
 protected:		
 	virtual int wybierzDeklaracje();
     virtual void wybierzKarte();
-private slots:
-    void kartaKliknieta(Karta);
+protected slots:
+    void kartaKliknieta(int);
 private:
-	ItKarta wczytajKarte();
     void wyroznijDozwoloneKarty();
 
 };

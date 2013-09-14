@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <QDebug>
 
 #include "Talia.h"
 
@@ -14,12 +15,12 @@ Talia::Talia() {
 	}
 	random_shuffle(karty.begin(), karty.end(), Talia::mRand);
 	
-	/*
-	for (int i = 0; i < 52; i++) {
-		cout << karty[i] << ".";
-	}
-	cout << endl;
-	*/
+    /*
+    for (int i = 0; i < 52; i++) {
+        qDebug() << karty[i].toQString();
+    }
+    */
+
 }
 
 Karta Talia::getKarta() {
@@ -28,7 +29,7 @@ Karta Talia::getKarta() {
 	return k;
 }
 
-vector<Karta> Talia::getKarty(int liczbaKart) {
+std::vector<Karta> Talia::getKarty(int liczbaKart) {
 	vector<Karta> k(karty.end() - liczbaKart, karty.end());
 	assert((int)k.size() == liczbaKart);
 	karty.resize(karty.size() - liczbaKart);

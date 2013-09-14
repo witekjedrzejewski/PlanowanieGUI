@@ -1,5 +1,6 @@
 #include <cassert>
 #include <QGraphicsTextItem>
+#include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 
 #include "Plansza.h"
@@ -15,9 +16,10 @@ Plansza::Plansza(int liczbaGraczy, QObject *parent)
 	_wziete = vector<int>(liczbaGraczy);
 	_punkty = vector<int>(liczbaGraczy, 0);
 
-    karty = QVector<QVector<KartaSprite*> >(liczbaGraczy);
+    karty = QVector<QList<KartaSprite*> >(liczbaGraczy);
 
     _nrLewy = 1;
+    _klikalna = false;
 
     // deklaracje Items
 
@@ -107,12 +109,16 @@ void Plansza::wypiszWynikiGry() {
 	cout << endl;
 }
 
-void Plansza::dolozKarteOdGracza(Karta k, int nr) {
-	assert(nr == _ktoWyklada);
+void Plansza::dolozKarteOdGracza(int nrKarty) {
+    int nr = _ktoWyklada;
+    Karta k = karty[nr].at(nrKarty)->karta();
     qDebug() << "-> " << k.toQString() << " od gracza " << nr << ")";
-	_stol[nr] = k;
+
+    removeItem(karty[nr].at(nrKarty));
+    karty[nr].removeAt(nrKarty);
+    _stol[nr] = k;
 	if (nr == _ktoWychodzi) {
-		_kolorWyjscia=k.kolor();
+        _kolorWyjscia = k.kolor();
 	}
 	_ktoWyklada = kolejnyGracz(_ktoWyklada);
 	
@@ -165,6 +171,12 @@ void Plansza::przyjmijDeklaracje(int d, int nr) {
 	_deklaracje[nr] = d;
 }
 
+void Plansza::dajKartyGraczowi(std::vector<Karta> v, int nr) {
+    for (unsigned i = 0; i < v.size(); ++i) {
+        dajKarteGraczowi(v[i], nr);
+    }
+}
+
 void Plansza::dajKarteGraczowi(Karta k, int nr) {
     KartaSprite* ks = new KartaSprite(k);
     karty[nr].push_back(ks);
@@ -186,10 +198,80 @@ void Plansza::ujawnijDeklaracjeGracza(int nr) {
     deklaracjeItems[nr]->setPlainText(s);
 }
 
-void Plansza::wyroznijKarty(int nrGracza, const QVector<bool> &doWyroznienia) {
-    for (unsigned i = 0; i < doWyroznienia.size(); ++i) {
-        if (doWyroznienia[i]) {
-            karty[nrGracza][i]->wyroznij();
+void Plansza::wyroznijDozwoloneKarty() {
+    _klikalna = true;
+    for (int i = 0; i < karty[_ktoWyklada].size(); ++i) {
+        if (kartaONumerzePoprawna(i, _ktoWyklada)) {
+            karty[_ktoWyklada][i]->wyroznij();
+        }
+    }
+}
+
+void Plansza::wylaczWyroznienie() {
+    qDebug() << "wylaczWyroznienie()";
+    _klikalna = false;
+    foreach(KartaSprite* ks, karty[_ktoWyklada]) {
+        ks->wylaczWyroznienie();
+    }
+}
+
+bool Plansza::graczPosiadaKartyWKolorze(int kolor, int nrGracza) const {
+    foreach (KartaSprite* ks, karty[nrGracza]) {
+        if (ks->karta().kolor() == kolor) {
+            return true;
+        }
+    }
+/*
+    for (int i = 0; i < karty[nrGracza].size(); ++i) {
+        if (karty[nrGracza].at(i)->karta().kolor() == kolor) {
+            return true;
+        }
+    }
+    */
+    return false;
+}
+
+bool Plansza::kartaONumerzePoprawna(int nrKarty, int nrGracza) const {
+
+    assert(nrKarty >= 0 && nrKarty < karty[nrGracza].size());
+
+    int kolor = karty[nrGracza].at(nrKarty)->karta().kolor();
+
+    if (nrGracza == _ktoWychodzi)
+        return true; // my wykladamy, wiec dowolna karta
+
+    if (kolor == _kolorWyjscia)
+        return true; // dolozone do koloru
+
+    return !graczPosiadaKartyWKolorze(_kolorWyjscia, nrGracza);
+}
+
+int Plansza::numerKarty(Karta k) {
+    for (int i = 0; i < karty[_ktoWyklada].size(); ++i) {
+        if (karty[_ktoWyklada].at(i)->karta() == k) {
+            return i;
+        }
+    }
+    assert(false);
+    return -1;
+}
+
+void Plansza::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    if (!_klikalna) {
+        return;
+    }
+    qDebug() << "pressed" << event->scenePos();
+    QList<QGraphicsItem *> itemy = items(event->scenePos());
+    qDebug() << itemy;
+    foreach (QGraphicsItem *item, itemy) {
+        if (item->type() == KartaSprite::Type) {
+            KartaSprite* ks = qgraphicsitem_cast<KartaSprite* >(item);
+            if (ks->wyrozniona()) {
+                qDebug() << "kliknieta" << ks->karta().toQString();
+                int idx = numerKarty(ks->karta());
+                qDebug() << "index" << idx;
+                emit kartaKliknieta(idx);
+            }
         }
     }
 }

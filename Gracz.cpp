@@ -15,7 +15,7 @@ void Gracz::deklaruj() {
 	
     qDebug() << "Gracz " << nr << ": deklaracja " << d;
 	
-	assert(d >= 0 && d <= (int)reka.size());
+    assert(d >= 0 && d <= liczbaKart);
 					
 	plansza->przyjmijDeklaracje(d, nr);
 
@@ -23,84 +23,44 @@ void Gracz::deklaruj() {
 }
 
 void Gracz::grajKarte() {
-    // qDebug() << "Gracz " << nr << ": grajKarte";
-	
-    if (reka.size() == 1) {
-        wybranaKarta = reka.begin();
-        polozKarte();
+    qDebug() << "Gracz " << nr << ": grajKarte";
+    assert(nr == plansza->ktoWyklada());
+    if (liczbaKart == 1) {
+        polozKarte(0);
     } else {
-        connect(this, SIGNAL(kartaWybrana()), this, SLOT(polozKarte()));
+        connect(this, SIGNAL(kartaWybrana(int)), this, SLOT(polozKarte(int)));
         wybierzKarte();
     }
 }
 
-void Gracz::wybierzKarte() {
-    emit kartaWybrana();
-}
+void Gracz::polozKarte(int nrKarty) {
+    disconnect(this, SIGNAL(kartaWybrana(int)), this, SLOT(polozKarte(int)));
 
-void Gracz::polozKarte() {
-    disconnect(this, SIGNAL(kartaWybrana()), this, SLOT(polozKarte()));
-
-    assert(kartaPoprawna(wybranaKarta));
+    assert(plansza->kartaONumerzePoprawna(nrKarty, nr));
 	
-    plansza->dolozKarteOdGracza(*wybranaKarta, nr);
-    usunKarte(wybranaKarta);
+    plansza->dolozKarteOdGracza(nrKarty);
+    usunKarte(nrKarty);
 
     emit kartaPolozona();
 }
 
 void Gracz::setReka(std::vector<Karta> r) {
-	reka = ZestawKart(r.begin(), r.end());
-    for (ItKarta it = reka.begin(); it != reka.end(); it++) {
-        plansza->dajKarteGraczowi(*it, nr);
-    }
+    // qDebug() << "Gracz.setReka";
+    liczbaKart = r.size();
+    plansza->dajKartyGraczowi(r, nr);
 }
 
 void Gracz::setPlansza(Plansza* p) {
 	plansza = p;
 }
 
-string Gracz::wypiszReke() {
-	ostringstream oss;
-	for (ItKarta it = reka.begin(); it != reka.end(); it++) {
-		oss << *it << " ";
-	}
-	return oss.str();
+void Gracz::usunKarte(int) {
+    liczbaKart--;
 }
 
-void Gracz::usunKarte(ItKarta iter) {
-	reka.erase(iter);
-}
-
-bool Gracz::kartaPoprawna (ItKarta iter)
-{
-	if (iter == reka.end()) {
-		cerr << "nie znaleziona" << endl;
-		return false;
-	}
-	
-	int wychodzi = plansza->ktoWychodzi();
-	if (nr == wychodzi)
-		return true; // my wykladamy, wiec dowolna karta
-	
-	Karta k = *iter;
-	int kolWyjscia = plansza->kolorWyjscia();
-	if (k.kolor() == kolWyjscia)
-		return true; // dolozone do koloru
-	
-	return !posiadaKartyWKolorze(kolWyjscia);
-}
-
-bool Gracz::posiadaKartyWKolorze(int kol) {
-	for (ItKarta it = reka.begin(); it != reka.end(); it++) {
-		if (it->kolor() == kol)
-			return true;
-	}
-	return false;
-}
-
+/*
 bool Gracz::KartyComparator::operator() (const Karta& a, const Karta& b) const {
 	if (a.kolor() == b.kolor())
 		return a.wysokosc() > b.wysokosc();
 	return a.kolor() < b.kolor();
-}
+}*/

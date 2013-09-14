@@ -62,7 +62,7 @@ void Gra::grajRozdanie() {
 
 void Gra::rozdajKarty()
 {
-    // qDebug() << "Gra.rozdajKarty";
+    qDebug() << "Gra.rozdajKarty";
 
     Talia talia;
     for (int i = 0; i < liczbaGraczy; ++i) {

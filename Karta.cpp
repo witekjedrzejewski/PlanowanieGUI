@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <QString>
-
+#include <QDebug>
 #include "Karta.h"
 
 using namespace std;
@@ -29,15 +29,14 @@ int Karta::kolorFromChar(char c) {
 }
 
 Karta::Karta() : _kolor(0), _wysokosc(0) {
-    //setBrush(QBrush(Qt::yellow));
 }
 
-Karta::Karta(int p) : Karta() {
+Karta::Karta(int p) {
 	_wysokosc = (p % 13) +2;
 	_kolor = (p/13) + 1;
 }
 
-Karta::Karta(std::string s) : Karta() {
+Karta::Karta(std::string s) {
 	_wysokosc = wysokoscFromChar(s[0]);
 	_kolor = kolorFromChar(s[1]);
 }
@@ -48,10 +47,10 @@ Karta::Karta(const Karta& k)
 Karta& Karta::operator=(const Karta& k)
 {
     if (&k != this) {
-			_wysokosc = k._wysokosc;
-			_kolor = k._kolor;
-		}
-		return *this;
+        _wysokosc = k._wysokosc;
+        _kolor = k._kolor;
+    }
+    return *this;
 }
 
 bool Karta::operator==(const Karta& k) const {

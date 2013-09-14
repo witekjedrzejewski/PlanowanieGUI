@@ -12,34 +12,21 @@ GraczZywy::GraczZywy(int nr) : Gracz(nr) { }
 
 int GraczZywy::wybierzDeklaracje() {
 
-    DialogDeklaracja* dialog = new DialogDeklaracja(reka.size());
+    DialogDeklaracja* dialog = new DialogDeklaracja(liczbaKart);
     dialog->exec();
 
     int d = dialog->deklaracja();
 	return d;
 }
 
-Gracz::ItKarta GraczZywy::wczytajKarte() {
-
-	string opis;
-	
-	cin >> opis;
-	Karta k(opis);
-	return reka.find(k);
-}
-
-void GraczZywy::wyroznijDozwoloneKarty() {
-    QVector <bool> poprawne;
-    for (ItKarta it = reka.begin(); it != reka.end(); ++it) {
-        poprawne.push_back(kartaPoprawna(it));
-    }
-    plansza->wyroznijKarty(nr, poprawne);
-}
-
 void GraczZywy::wybierzKarte() {
     //qDebug() << "Gracz " << nr << " wybierz karte";
-    wyroznijDozwoloneKarty();
+    plansza->wyroznijDozwoloneKarty();
+    connect(plansza, SIGNAL(kartaKliknieta(int)), this, SLOT(kartaKliknieta(int)));
+}
 
-    wybranaKarta = reka.begin();
-    Gracz::wybierzKarte();
+void GraczZywy::kartaKliknieta(int nrKarty) {
+    disconnect(plansza, SIGNAL(kartaKliknieta(int)), this, SLOT(kartaKliknieta(int)));
+    plansza->wylaczWyroznienie();
+    emit(kartaWybrana(nrKarty));
 }

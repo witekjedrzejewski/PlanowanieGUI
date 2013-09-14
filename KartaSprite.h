@@ -13,15 +13,19 @@ public:
     KartaSprite(Karta k, QGraphicsItem *parent = 0);
     ~KartaSprite() {}
 
+    enum { Type = UserType + 1 };
+    virtual int type() const;
+
+    Karta karta() const;
     void wyroznij();
+    void wylaczWyroznienie();
+    bool wyrozniona() const;
 
 public slots:
 
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-
 private:
-    Karta karta;
+    Karta _karta;
+    bool _wyrozniona;
     static const QColor kolory[5];
     QGraphicsTextItem* tekst;
 };

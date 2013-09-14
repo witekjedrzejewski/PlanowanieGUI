@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QGraphicsScene>
 #include <QVector>
+#include <QList>
 
 #include <vector>
 #include <algorithm>
@@ -44,8 +45,8 @@ public:
 	/* kolor w ktorym jest wylozona karta */
 	int kolorWyjscia() const;
 	
-	/* przyjmuje karte k od gracza z numerem nr */
-	void dolozKarteOdGracza(Karta k, int nr);
+    /* przyjmuje karte o danym nr od gracza ktory powinien dac karte */
+    void dolozKarteOdGracza(int nrKarty);
 	
 	/* przyjmuje deklaracje d lew od gracza nr */
 	void przyjmijDeklaracje(int d, int nr);
@@ -60,11 +61,11 @@ public:
 	
 	void setKtoWistuje(int w);
 	
-    /* rysuje karte na planszy */
-    void dajKarteGraczowi(Karta k, int nr);
+    void dajKartyGraczowi(std::vector<Karta> v, int nr);
 
-    /* wyroznia karty gracza, dla ktorych doWyroznienia == true */
-    void wyroznijKarty(int nrGracza, const QVector<bool>& doWyroznienia);
+    void wyroznijDozwoloneKarty();
+
+    void wylaczWyroznienie();
 
 	/* nr gracza po lewej od aktualnego */
 	int kolejnyGracz(int aktualnyGracz);
@@ -72,7 +73,20 @@ public:
     /* czy rozdanie zostalo zakonczone */
     bool koniecRozdania() const;
 
+    bool kartaONumerzePoprawna(int nrKarty, int nrGracza) const;
+    bool graczPosiadaKartyWKolorze(int kolor, int nrGracza) const;
+
+    /* dla danej karty wykladajacego gracza zwraca jej numer */
+    int numerKarty(Karta k);
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
+signals:
+    void kartaKliknieta(int);
+
 private:
+
 	void zakonczLewe();
 	void czyscStol();
     void ujawnijDeklaracjeGracza(int nr);
@@ -81,6 +95,9 @@ private:
 	/* wypelnia v zerami */
 	static void zeruj(std::vector<int>& v);
 	
+    /* rysuje karte na planszy */
+    void dajKarteGraczowi(Karta k, int nr);
+
 	int _liczbaGraczy;
 	char _kolorWyjscia;
 	int _ktoWyklada;
@@ -89,6 +106,8 @@ private:
 	int _ktoWistuje;
 	int _ktoWychodzi;
 	
+    bool _klikalna;
+
 	std::vector<int> _deklaracje;
 	std::vector<Karta> _stol;
 	std::vector<int> _wziete;
@@ -97,7 +116,7 @@ private:
 	int _wychodzilOstatnio;
 	std::vector<Karta> _ostatniaLewa;
 
-    QVector<QVector<KartaSprite* > >karty;
+    QVector<QList<KartaSprite* > >karty;
 
     QVector<QGraphicsTextItem* > deklaracjeItems;
 };
