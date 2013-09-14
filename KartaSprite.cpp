@@ -37,6 +37,10 @@ Karta KartaSprite::karta() const {
     return _karta;
 }
 
+void KartaSprite::przesonWLewo(int pxl) {
+    setX(x() - pxl);
+}
+
 void KartaSprite::wyroznij() {
     //qDebug() << "wyrozniam " << karta.toQString();
     _wyrozniona = true;

@@ -2,7 +2,7 @@
 #define gra_H_
 
 #include <QObject>
-#include <vector>
+#include <QVector>
 
 #include "Gracz.h"
 #include "Plansza.h"
@@ -12,8 +12,8 @@ class Gra : public QObject {
     Q_OBJECT
 
 public:
-    Gra(const std::vector<bool>& gracze,
-        const std::vector<int>& liczbyKart,
+    Gra(const QVector<bool>& gracze,
+        const QVector<int>& liczbyKart,
         QObject *parent = 0);
     virtual ~Gra() {}
     Plansza* getPlansza() const;
@@ -37,10 +37,10 @@ private:
     int aktualnyIndeksLiczbyKart;
 
 	Plansza* plansza;
-	std::vector<Gracz*> gracze;
+    QVector<Gracz*> gracze;
 	
-	std::vector<bool> zywiGracze;
-	std::vector<int> liczbyKart;
+    QVector<bool> zywiGracze;
+    QVector<int> liczbyKart;
 
 };
 #endif

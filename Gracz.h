@@ -16,11 +16,11 @@ public:
 	
 	virtual ~Gracz();
 	
-    virtual void setReka(std::vector<Karta> reka);
+    virtual void setReka(QVector<Karta> reka);
 	void setPlansza(Plansza* plansza);
 	
-	void deklaruj();
-	void grajKarte();
+    void deklaruj();
+    void grajKarte();
 	
 	std::string wypiszReke();
 

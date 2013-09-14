@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Gra::Gra(const vector<bool>& g, const vector<int>& k, QObject *parent)
+Gra::Gra(const QVector<bool> &g, const QVector<int> &k, QObject *parent)
     : QObject(parent), zywiGracze(g), liczbyKart(k) {
 
     liczbaGraczy = zywiGracze.size();
@@ -110,6 +110,7 @@ void Gra::grajKarte()
 
 void Gra::zakonczRozdanie() {
     aktualnyIndeksLiczbyKart++;
+    plansza->podsumujRozdanie();
     if (aktualnyIndeksLiczbyKart >= (int)liczbyKart.size()) { // to bylo ostatnie rozdanie
         zakonczGre();
     } else {

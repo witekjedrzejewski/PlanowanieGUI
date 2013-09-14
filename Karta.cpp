@@ -57,6 +57,12 @@ bool Karta::operator==(const Karta& k) const {
 	return _kolor == k._kolor && _wysokosc == k._wysokosc;
 }
 
+bool Karta::operator< (const Karta& k) const {
+    if (_kolor == k._kolor)
+        return _wysokosc > k._wysokosc;
+    return _kolor < k._kolor;
+}
+
 int Karta::kolor() const {
 	return _kolor;
 }

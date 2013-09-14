@@ -29,11 +29,11 @@ Karta Talia::getKarta() {
 	return k;
 }
 
-std::vector<Karta> Talia::getKarty(int liczbaKart) {
-	vector<Karta> k(karty.end() - liczbaKart, karty.end());
+QVector<Karta> Talia::getKarty(int liczbaKart) {
+    std::vector<Karta> k(karty.end() - liczbaKart, karty.end());
 	assert((int)k.size() == liczbaKart);
 	karty.resize(karty.size() - liczbaKart);
-	return k;
+    return QVector<Karta>::fromStdVector(k);
 }
 
 int Talia::mRand(int i) {

@@ -20,6 +20,7 @@ public:
     void wyroznij();
     void wylaczWyroznienie();
     bool wyrozniona() const;
+    void przesonWLewo(int pxl);
 
 public slots:
 

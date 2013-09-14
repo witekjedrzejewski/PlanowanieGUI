@@ -6,7 +6,6 @@
 #include <QVector>
 #include <QList>
 
-#include <vector>
 #include <algorithm>
 
 #include "Karta.h"
@@ -20,19 +19,19 @@ public:
     Plansza(int liczbaGraczy, QObject* parent = 0);
 	
 	/* karty aktualnie lezace na stole */
-	std::vector<Karta> stol() const;
+    QVector<Karta> stol() const;
 	
 	/* deklaracje poszczegolnych graczy */
-	std::vector<int> deklaracje() const;
+    QVector<int> deklaracje() const;
 	
 	/* wyniki punktowe */
-	std::vector<int> wyniki() const;
+    QVector<int> wyniki() const;
 	
 	/* ile ugrali w tym rozdaniu poszczegolnie gracze */
-	std::vector<int> wziete() const;
+    QVector<int> wziete() const;
 	
 	/* kto wyszedl, dolozone karty */
-	std::pair<int, std::vector<Karta> > ostatniaLewa() const;
+    std::pair<int, QVector<Karta> > ostatniaLewa() const;
 	
 	/* nr gracza ktory powinien wylozyc pierwszy w aktualnej lewie */
 	int ktoWychodzi() const;
@@ -61,7 +60,7 @@ public:
 	
 	void setKtoWistuje(int w);
 	
-    void dajKartyGraczowi(std::vector<Karta> v, int nr);
+    void dajKartyGraczowi(QVector<Karta> v, int nr);
 
     void wyroznijDozwoloneKarty();
 
@@ -86,14 +85,13 @@ signals:
     void kartaKliknieta(int);
 
 private:
-
-	void zakonczLewe();
+    void zakonczLewe();
 	void czyscStol();
     void ujawnijDeklaracjeGracza(int nr);
+    void przelozKarteNaStol(int nrKarty);
     int punktyZa(int wziete, int deklarowane);
 	
-	/* wypelnia v zerami */
-	static void zeruj(std::vector<int>& v);
+    void zerujWziete();
 	
     /* rysuje karte na planszy */
     void dajKarteGraczowi(Karta k, int nr);
@@ -108,17 +106,18 @@ private:
 	
     bool _klikalna;
 
-	std::vector<int> _deklaracje;
-	std::vector<Karta> _stol;
-	std::vector<int> _wziete;
-	std::vector<int> _punkty;
+    QVector<int> _deklaracje;
+    QVector<KartaSprite* > _stol;
+    QVector<int> _wziete;
+    QVector<int> _punkty;
 	
 	int _wychodzilOstatnio;
-	std::vector<Karta> _ostatniaLewa;
+    QVector<Karta> _ostatniaLewa;
 
     QVector<QList<KartaSprite* > >karty;
 
     QVector<QGraphicsTextItem* > deklaracjeItems;
+    QVector<QGraphicsTextItem* > wzieteItems;
 };
 
 #endif

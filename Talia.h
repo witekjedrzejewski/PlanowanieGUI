@@ -1,6 +1,7 @@
 #ifndef TALIA_H
 #define	TALIA_H
 
+#include <QVector>
 #include <vector>
 #include "Karta.h"
 
@@ -10,10 +11,10 @@ public:
 	Talia();
 	Karta getKarta();
 
-    std::vector<Karta> getKarty(int liczbaKart);
+    QVector<Karta> getKarty(int liczbaKart);
 	
 private:
-	std::vector<Karta> karty;
+    std::vector<Karta> karty;
 	static int mRand(int i);
 };
 

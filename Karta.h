@@ -19,7 +19,8 @@ public:
 	Karta& operator=(const Karta& k);
 	
 	bool operator==(const Karta& k) const;
-	
+    bool operator<(const Karta& k) const;
+
 	/* czy przebijamy karte k, jesli ktos wyszedl w karte k? */
 	bool lepszaNizWychodzaca(const Karta& k);
 	

@@ -11,17 +11,17 @@ using namespace std;
 Plansza::Plansza(int liczbaGraczy, QObject *parent)
     : QGraphicsScene(parent), _liczbaGraczy(liczbaGraczy)
 {
-    _stol = vector<Karta>(liczbaGraczy);
-	_deklaracje = vector<int>(liczbaGraczy);
-	_wziete = vector<int>(liczbaGraczy);
-	_punkty = vector<int>(liczbaGraczy, 0);
+    _stol = QVector<KartaSprite* >(liczbaGraczy);
+    _deklaracje = QVector<int>(liczbaGraczy);
+    _wziete = QVector<int>(liczbaGraczy);
+    _punkty = QVector<int>(liczbaGraczy, 0);
 
     karty = QVector<QList<KartaSprite*> >(liczbaGraczy);
 
     _nrLewy = 1;
     _klikalna = false;
 
-    // deklaracje Items
+    // deklaracje i wziete Items
 
     QFont font;
     font.setBold(true);
@@ -34,6 +34,13 @@ Plansza::Plansza(int liczbaGraczy, QObject *parent)
         item->setPos(0, i*50);
         addItem(item);
         deklaracjeItems.push_back(item);
+
+        item = new QGraphicsTextItem;
+        item->setPlainText(tr("0"));
+        item->setFont(font);
+        item->setPos(-50, i*50);
+        addItem(item);
+        wzieteItems.push_back(item);
     }
 
     setBackgroundBrush(Qt::green);
@@ -60,15 +67,19 @@ int Plansza::kolorWyjscia() const {
 	return _kolorWyjscia;
 }
 
-vector<Karta> Plansza::stol() const {
-	return _stol;
+QVector<Karta> Plansza::stol() const {
+    QVector<Karta> v;
+    foreach(KartaSprite* ks, _stol) {
+        v.push_back(ks->karta());
+    }
+    return v;
 }
 
-vector<int> Plansza::wziete() const {
+QVector<int> Plansza::wziete() const {
 	return _wziete;
 }
 
-pair<int, vector<Karta> > Plansza::ostatniaLewa() const {
+std::pair<int, QVector<Karta> > Plansza::ostatniaLewa() const {
 	return make_pair(_wychodzilOstatnio, _ostatniaLewa);
 }
 
@@ -84,21 +95,23 @@ int Plansza::punktyZa(int wziete, int deklarowane) {
 	return wziete + ((wziete == deklarowane) ? _liczbaKart : 0);
 }
 
-void Plansza::zeruj(vector<int>& v) {
-	fill(v.begin(), v.end(), 0);
+void Plansza::zerujWziete() {
+    _wziete.fill(0);
+    foreach (QGraphicsTextItem* item, wzieteItems) {
+        item->setPlainText(tr("0"));
+    }
 }
 
 void Plansza::podsumujRozdanie() {
-	cout << "Wyniki (wziete/deklarowane): ";
+    qDebug() << "Wyniki (wziete/deklarowane): ";
 	for (int i = 0; i < _liczbaGraczy; i++) {
 		int punkty = punktyZa(_wziete[i], _deklaracje[i]);
-		cout << i << ": " << punkty << "(" << _wziete[i] 
+        qDebug() << i << ": " << punkty << "(" << _wziete[i]
 						<< "/" << _deklaracje[i] << ") ";
 		_punkty[i] += punkty;
-	}
-	cout << endl;
-	
-	zeruj(_wziete); 
+    }
+    zerujWziete();
+    _nrLewy = 1;
 }
 
 void Plansza::wypiszWynikiGry() {
@@ -110,16 +123,7 @@ void Plansza::wypiszWynikiGry() {
 }
 
 void Plansza::dolozKarteOdGracza(int nrKarty) {
-    int nr = _ktoWyklada;
-    Karta k = karty[nr].at(nrKarty)->karta();
-    qDebug() << "-> " << k.toQString() << " od gracza " << nr << ")";
-
-    removeItem(karty[nr].at(nrKarty));
-    karty[nr].removeAt(nrKarty);
-    _stol[nr] = k;
-	if (nr == _ktoWychodzi) {
-        _kolorWyjscia = k.kolor();
-	}
+    przelozKarteNaStol(nrKarty);
 	_ktoWyklada = kolejnyGracz(_ktoWyklada);
 	
 	if (_ktoWyklada == _ktoWychodzi) {
@@ -127,11 +131,29 @@ void Plansza::dolozKarteOdGracza(int nrKarty) {
 	}
 }
 
+void Plansza::przelozKarteNaStol(int nrKarty) {
+    int nr = _ktoWyklada;
+    KartaSprite* ks = karty[nr].at(nrKarty);
+    Karta k = ks->karta();
+    qDebug() << "-> " << k.toQString() << " od gracza " << nr << ")";
+
+    _stol[nr] = ks;
+    if (nr == _ktoWychodzi) {
+        _kolorWyjscia = k.kolor();
+    }
+
+    ks->setPos(40 * _ktoWyklada, 50 * _liczbaGraczy);
+    for (int i = nrKarty + 1; i < karty[nr].size(); ++i) {
+        karty[nr].at(i)->przesonWLewo(35);
+    }
+    karty[nr].removeAt(nrKarty);
+}
+
 void Plansza::zakonczLewe() {
 	// cerr << "Plansza.zakonczLewe" << endl;
 	
 	// zapisanie historii
-	_ostatniaLewa = _stol;
+    _ostatniaLewa = stol();
 	_wychodzilOstatnio = _ktoWychodzi;
 	
 	// wylonienie zwyciezcy
@@ -139,7 +161,7 @@ void Plansza::zakonczLewe() {
 	int i = _ktoWychodzi;
 	do {
 		i = kolejnyGracz(i);
-		if (_stol[i].lepszaNizWychodzaca(_stol[wygrany])) {
+        if (_stol[i]->karta().lepszaNizWychodzaca(_stol[wygrany]->karta())) {
 			wygrany = i;
 		}
 	} while (i != _ktoWychodzi);
@@ -148,18 +170,21 @@ void Plansza::zakonczLewe() {
     qDebug() << "------------------";
 
 	_ktoWychodzi = _ktoWyklada = wygrany;
-	_wziete[wygrany]++;
+
+    _wziete[wygrany]++;
+    wzieteItems[wygrany]->setPlainText(QString::number(_wziete[wygrany]));
 
     _nrLewy++;
-	
+
 	czyscStol();
 }
 
 void Plansza::czyscStol() {
 	//cerr << "Plansza.czyscStol" << endl;
 	
-	for (unsigned i = 0; i < _stol.size(); i++) {
-		_stol[i] = Karta(); /* TODO pusta karta */
+    for (int i = 0; i < _stol.size(); i++) {
+        removeItem(_stol[i]);
+        delete _stol[i];
 	}
 }
 
@@ -171,8 +196,9 @@ void Plansza::przyjmijDeklaracje(int d, int nr) {
 	_deklaracje[nr] = d;
 }
 
-void Plansza::dajKartyGraczowi(std::vector<Karta> v, int nr) {
-    for (unsigned i = 0; i < v.size(); ++i) {
+void Plansza::dajKartyGraczowi(QVector<Karta> v, int nr) {
+    qSort(v);
+    for (int i = 0; i < v.size(); ++i) {
         dajKarteGraczowi(v[i], nr);
     }
 }
@@ -221,13 +247,6 @@ bool Plansza::graczPosiadaKartyWKolorze(int kolor, int nrGracza) const {
             return true;
         }
     }
-/*
-    for (int i = 0; i < karty[nrGracza].size(); ++i) {
-        if (karty[nrGracza].at(i)->karta().kolor() == kolor) {
-            return true;
-        }
-    }
-    */
     return false;
 }
 
@@ -260,16 +279,15 @@ void Plansza::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if (!_klikalna) {
         return;
     }
-    qDebug() << "pressed" << event->scenePos();
+    // qDebug() << "pressed" << event->scenePos();
     QList<QGraphicsItem *> itemy = items(event->scenePos());
-    qDebug() << itemy;
     foreach (QGraphicsItem *item, itemy) {
         if (item->type() == KartaSprite::Type) {
             KartaSprite* ks = qgraphicsitem_cast<KartaSprite* >(item);
             if (ks->wyrozniona()) {
-                qDebug() << "kliknieta" << ks->karta().toQString();
+                // qDebug() << "kliknieta" << ks->karta().toQString();
                 int idx = numerKarty(ks->karta());
-                qDebug() << "index" << idx;
+                // qDebug() << "index" << idx;
                 emit kartaKliknieta(idx);
             }
         }

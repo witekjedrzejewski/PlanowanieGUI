@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 
 #include <QGraphicsView>
-#include <vector>
+#include <QVector>
 
 using namespace std;
 
@@ -25,12 +25,12 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::uruchomGre() {
-    vector<bool> g (2, 0);
-    g[0] = 1;
 
-    vector<int> r (1, 10);
+    QVector<bool> gracze (3, 1);
+    QVector<int> rozdania (2, 3);
 
-    gra = new Gra(g, r);
+    gra = new Gra(gracze, rozdania);
+
     plansza = gra->getPlansza();
     view->setScene(plansza);
     show();
